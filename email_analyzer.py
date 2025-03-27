@@ -2,8 +2,8 @@ import streamlit as st
 from transformers import pipeline
 import matplotlib.pyplot as plt
 
-# Load the pre-trained model for email classification
-classifier = pipeline("text-classification", model="bhadresh-savani/distilbert-base-uncased-emotion")
+# Load the pre-trained spam detection model
+classifier = pipeline("text-classification", model="mrm8488/bert-tiny-finetuned-sms-spam-detection")
 
 def classify_email(email_text):
     # Classify the email text
@@ -18,8 +18,8 @@ def highlight_suspicious_words(email_text, keywords):
     return highlighted_text
 
 def generate_summary(category, confidence):
-    if category.lower() in ["spam", "phishing"]:
-        summary = f"⚠️ This email is likely a **{category}** with a confidence score of {confidence:.2f}. It is highly recommended not to reply or click any links. Be cautious of any requests for personal information or urgent actions."
+    if category.lower() == "spam":
+        summary = f"⚠️ This email is likely **{category}** with a confidence score of {confidence:.2f}. It is highly recommended not to reply or click any links. Be cautious of any requests for personal information or urgent actions."
     else:
         summary = f"ℹ️ This email does not appear to be spammy, but always exercise caution. Confidence score: {confidence:.2f}."
     return summary
@@ -46,7 +46,7 @@ email_text = st.text_area("Email Text")
 
 if email_text:
     result = classify_email(email_text)
-    category = "spam" if result[0]['label'] in ["LABEL_1", "LABEL_2"] else "not spam"
+    category = "spam" if result[0]['label'] == "spam" else "not spam"
     confidence = result[0]['score']
     
     st.markdown(f"### Spam Likelihood: **{confidence * 100:.2f}%**")
@@ -64,7 +64,6 @@ if email_text:
     st.markdown(f"### Summary")
     st.write(summary)
     
-    st.markdown("### Legend")
     st.markdown("""
     - **Free / Win / Risk-Free**: Common keywords in financial & prize scams.
     - **Click Here / Verify Your Account**: Common phishing keywords.
