@@ -2,13 +2,23 @@ import streamlit as st
 from transformers import pipeline
 import matplotlib.pyplot as plt
 
-# Load the pre-trained spam detection model
-classifier = pipeline("text-classification", model="mrm8488/bert-tiny-finetuned-sms-spam-detection")
+# Load the pre-trained spam detection models
+spam_classifier = pipeline("text-classification", model="mrm8488/bert-tiny-finetuned-sms-spam-detection")
+entailment_classifier = pipeline("zero-shot-classification", model="valhalla/distilbart-mnli-12-3")
 
 def classify_email(email_text):
-    # Classify the email text
-    result = classifier(email_text)
-    return result
+    # Classify the email text using multiple models
+    spam_result = spam_classifier(email_text)
+    entailment_result = entailment_classifier(email_text, candidate_labels=["spam", "not spam"])
+    
+    # Combine results
+    spam_score = spam_result[0]['score'] if spam_result[0]['label'] == "spam" else 1 - spam_result[0]['score']
+    entailment_score = entailment_result['scores'][entailment_result['labels'].index("spam")]
+    
+    # Average the scores
+    avg_score = (spam_score + entailment_score) / 2
+    
+    return avg_score
 
 def highlight_suspicious_words(email_text, keywords):
     # Highlight suspicious words in the email text
@@ -17,9 +27,9 @@ def highlight_suspicious_words(email_text, keywords):
         highlighted_text = highlighted_text.replace(keyword, f"**{keyword}**")
     return highlighted_text
 
-def generate_summary(category, confidence):
-    if category.lower() == "spam":
-        summary = f"⚠️ This email is likely **{category}** with a confidence score of {confidence:.2f}. It is highly recommended not to reply or click any links. Be cautious of any requests for personal information or urgent actions."
+def generate_summary(confidence):
+    if confidence > 0.5:
+        summary = f"⚠️ This email is likely spam with a confidence score of {confidence:.2f}. It is highly recommended not to reply or click any links. Be cautious of any requests for personal information or urgent actions."
     else:
         summary = f"ℹ️ This email does not appear to be spammy, but always exercise caution. Confidence score: {confidence:.2f}."
     return summary
@@ -45,9 +55,7 @@ st.write("Paste your email text below to analyze its spam likelihood.")
 email_text = st.text_area("Email Text")
 
 if email_text:
-    result = classify_email(email_text)
-    category = "spam" if result[0]['label'] == "spam" else "not spam"
-    confidence = result[0]['score']
+    confidence = classify_email(email_text)
     
     st.markdown(f"### Spam Likelihood: **{confidence * 100:.2f}%**")
     
@@ -60,10 +68,10 @@ if email_text:
     st.markdown("### Explanation")
     st.write("The pie chart above represents the likelihood that the analyzed email is spam. The percentage indicates the confidence level of the classification model. A higher percentage suggests a higher probability that the email is spam. Always exercise caution and avoid clicking on suspicious links or providing personal information in response to such emails.")
     
-    summary = generate_summary(category, confidence)
+    summary = generate_summary(confidence)
     st.markdown(f"### Summary")
     st.write(summary)
-    
+
     st.markdown("""
     - **Free / Win / Risk-Free**: Common keywords in financial & prize scams.
     - **Click Here / Verify Your Account**: Common phishing keywords.
@@ -73,7 +81,7 @@ if email_text:
     - **Make Money Online / Get Rich Quick**: Work-from-home & easy money scams.
     """)
 
-    if category == "spam":
+    if confidence > 0.5:
         st.warning("⚠️ This email appears to be very spammy. It is highly recommended not to reply or click any links.")
     else:
         st.info("ℹ️ This email does not appear to be spammy, but always exercise caution.")
