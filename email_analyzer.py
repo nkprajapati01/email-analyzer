@@ -40,7 +40,7 @@ suspicious_keywords = [
 
 # Streamlit app
 st.title("📧 Email Analyzer")
-st.write("Paste your email text below to analyze its category.")
+st.write("Paste your email text below to analyze its spam likelihood.")
 
 email_text = st.text_area("Email Text")
 
@@ -49,19 +49,16 @@ if email_text:
     category = result[0]['label']
     confidence = result[0]['score']
     
-    st.markdown(f"### Category: **{category}**")
-    st.write(f"Confidence Score: {confidence:.2f}")
+    st.markdown(f"### Spam Likelihood: **{confidence * 100:.2f}%**")
     
-    highlighted_text = highlight_suspicious_words(email_text, suspicious_keywords)
-    
-    st.write("Highlighted Suspicious Words in Email Text:")
-    st.write(highlighted_text)
-    
-    # Pie chart for confidence score
-    fig, ax = plt.subplots(figsize=(2.5, 2.5))
-    ax.pie([confidence, 1 - confidence], labels=[f"{category}", "Other"], autopct='%1.1f%%', startangle=90, colors=['#ff9999','#66b3ff'])
+    # Pie chart for spam likelihood
+    fig, ax = plt.subplots(figsize=(4, 4))
+    ax.pie([confidence, 1 - confidence], labels=[f"Spam", "Not Spam"], autopct='%1.1f%%', startangle=90, colors=['#ff9999','#66b3ff'])
     ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
     st.pyplot(fig)
+    
+    st.markdown("### Explanation")
+    st.write("The pie chart above represents the likelihood that the analyzed email is spam. The percentage indicates the confidence level of the classification model. A higher percentage suggests a higher probability that the email is spam. Always exercise caution and avoid clicking on suspicious links or providing personal information in response to such emails.")
     
     summary = generate_summary(category, confidence)
     st.markdown(f"### Summary")
