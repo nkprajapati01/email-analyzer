@@ -24,18 +24,18 @@ def generate_summary(category, confidence):
         summary = f"ℹ️ This email does not appear to be spammy, but always exercise caution. Confidence score: {confidence:.2f}."
     return summary
 
-# List of suspicious keywords
+# Refined list of suspicious keywords
 suspicious_keywords = [
     "free", "win", "winner", "congratulations", "claim your prize", "limited time offer",
-    "you have been selected", "risk-free", "no credit card required", "act now", "urgent",
+    "you have been selected", "risk-free", "no credit card required", "act now",
     "click here", "verify your account", "secure your account", "your account is at risk",
     "unusual activity detected", "update your payment details", "login required",
-    "suspicious activity", "confidential information", "guaranteed", "lowest price",
-    "exclusive deal", "best rates", "special promotion", "double your income",
+    "suspicious activity", "guaranteed", "lowest price",
+    "exclusive deal", "best rates", "double your income",
     "earn money fast", "no investment required", "free trial", "miracle cure",
     "anti-aging", "weight loss", "doctor approved", "100% safe", "instant results",
     "you’re a winner", "casino bonus", "jackpot", "betting tips", "no deposit required",
-    "make money online", "work from home", "financial freedom", "get rich quick", "passive income"
+    "make money online", "financial freedom", "get rich quick"
 ]
 
 # Streamlit app
