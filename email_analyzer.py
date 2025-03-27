@@ -17,6 +17,13 @@ def highlight_suspicious_words(email_text, keywords):
         highlighted_text = highlighted_text.replace(keyword, f"**{keyword}**")
     return highlighted_text
 
+def generate_summary(category, confidence):
+    if category.lower() in ["spam", "phishing"]:
+        summary = f"⚠️ This email is likely a **{category}** with a confidence score of {confidence:.2f}. It is highly recommended not to reply or click any links. Be cautious of any requests for personal information or urgent actions."
+    else:
+        summary = f"ℹ️ This email is categorized as **{category}** with a confidence score of {confidence:.2f}. Please review the content carefully."
+    return summary
+
 # List of suspicious keywords
 suspicious_keywords = [
     "free", "win", "winner", "congratulations", "claim your prize", "limited time offer",
@@ -32,7 +39,7 @@ suspicious_keywords = [
 ]
 
 # Streamlit app
-st.title("Email Analyzer")
+st.title("📧 Email Analyzer")
 st.write("Paste your email text below to analyze its category.")
 
 email_text = st.text_area("Email Text")
@@ -42,16 +49,35 @@ if email_text:
     category = result[0]['label']
     confidence = result[0]['score']
     
-    st.write(f"Category: {category}")
+    st.markdown(f"### Category: **{category}**")
     st.write(f"Confidence Score: {confidence:.2f}")
     
     highlighted_text = highlight_suspicious_words(email_text, suspicious_keywords)
     
-    st.write("Highlighted Email Text:")
+    st.write("Highlighted Suspicious Words in Email Text:")
     st.write(highlighted_text)
     
     # Pie chart for confidence score
-    fig, ax = plt.subplots()
-    ax.pie([confidence, 1 - confidence], labels=[f"{category}", "Other"], autopct='%1.1f%%', startangle=90)
+    fig, ax = plt.subplots(figsize=(2.5, 2.5))
+    ax.pie([confidence, 1 - confidence], labels=[f"{category}", "Other"], autopct='%1.1f%%', startangle=90, colors=['#ff9999','#66b3ff'])
     ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
     st.pyplot(fig)
+    
+    summary = generate_summary(category, confidence)
+    st.markdown(f"### Summary")
+    st.write(summary)
+    
+    st.markdown("### Legend")
+    st.markdown("""
+    - **Free / Win / Risk-Free**: Common keywords in financial & prize scams.
+    - **Click Here / Verify Your Account**: Common phishing keywords.
+    - **Guaranteed / Lowest Price**: Marketing & promotional spam.
+    - **Miracle Cure / Weight Loss**: Health & medicine spam.
+    - **You’re a Winner / Casino Bonus**: Lottery & gambling spam.
+    - **Make Money Online / Get Rich Quick**: Work-from-home & easy money scams.
+    """)
+
+    if category.lower() in ["spam", "phishing"]:
+        st.warning("⚠️ This email appears to be very spammy. It is highly recommended not to reply or click any links.")
+    else:
+        st.info("ℹ️ This email does not appear to be spammy, but always exercise caution.")
