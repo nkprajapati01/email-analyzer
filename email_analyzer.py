@@ -28,7 +28,7 @@ def highlight_suspicious_words(email_text, keywords):
     return highlighted_text
 
 def generate_summary(confidence):
-    if confidence > 0.5:
+    if confidence > 0.4:
         summary = f"⚠️ This email is likely spam with a confidence score of {confidence:.2f}. It is highly recommended not to reply or click any links. Be cautious of any requests for personal information or urgent actions."
     else:
         summary = f"ℹ️ This email does not appear to be spammy, but always exercise caution. Confidence score: {confidence:.2f}."
@@ -81,7 +81,7 @@ if email_text:
     - **Make Money Online / Get Rich Quick**: Work-from-home & easy money scams.
     """)
 
-    if confidence > 0.5:
+    if confidence > 0.4:
         st.warning("⚠️ This email appears to be very spammy. It is highly recommended not to reply or click any links.")
     else:
         st.info("ℹ️ This email does not appear to be spammy, but always exercise caution.")
