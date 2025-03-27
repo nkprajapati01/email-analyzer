@@ -21,7 +21,7 @@ def generate_summary(category, confidence):
     if category.lower() in ["spam", "phishing"]:
         summary = f"⚠️ This email is likely a **{category}** with a confidence score of {confidence:.2f}. It is highly recommended not to reply or click any links. Be cautious of any requests for personal information or urgent actions."
     else:
-        summary = f"ℹ️ This email is categorized as **{category}** with a confidence score of {confidence:.2f}. Please review the content carefully."
+        summary = f"ℹ️ This email does not appear to be spammy, but always exercise caution. Confidence score: {confidence:.2f}."
     return summary
 
 # List of suspicious keywords
@@ -46,7 +46,7 @@ email_text = st.text_area("Email Text")
 
 if email_text:
     result = classify_email(email_text)
-    category = result[0]['label']
+    category = "spam" if result[0]['label'] in ["LABEL_1", "LABEL_2"] else "not spam"
     confidence = result[0]['score']
     
     st.markdown(f"### Spam Likelihood: **{confidence * 100:.2f}%**")
@@ -74,7 +74,7 @@ if email_text:
     - **Make Money Online / Get Rich Quick**: Work-from-home & easy money scams.
     """)
 
-    if category.lower() in ["spam", "phishing"]:
+    if category == "spam":
         st.warning("⚠️ This email appears to be very spammy. It is highly recommended not to reply or click any links.")
     else:
         st.info("ℹ️ This email does not appear to be spammy, but always exercise caution.")
